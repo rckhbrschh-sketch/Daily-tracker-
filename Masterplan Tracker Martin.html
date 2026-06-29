@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masterplan – Martin Edenhofer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0F0F13;
+    --surface: #1A1A24;
+    --surface2: #22222E;
+    --border: #2A2A38;
+    --text: #E8E8F0;
+    --muted: #666;
+    --subtle: #444;
+    --morgen: #F59E0B;
+    --ernaehrung: #10B981;
+    --bewegung: #3B82F6;
+    --geist: #EC4899;
+    --gesicht: #8B5CF6;
+    --arbeit: #EF4444;
+    --abend: #6366F1;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    max-width: 520px;
+    margin: 0 auto;
+    padding-bottom: 100px;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 28px 20px 16px;
+    background: linear-gradient(180deg, #1A1A24 0%, var(--bg) 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-date { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .header-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+  .header-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* DATE NAV */
+  .date-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .date-nav button {
+    background: var(--surface2);
+    border: none;
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .date-nav button:hover { background: var(--border); }
+  .date-nav .date-display {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .date-nav .today-btn {
+    background: #3B82F6;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .date-nav .today-btn.hidden { visibility: hidden; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 20px 4px;
+  }
+  .tab {
+    flex: 1;
+    padding: 8px 0;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .tab.active { background: #3B82F6; color: #fff; }
+
+  /* CONTENT */
+  .content { padding: 12px 20px; }
+
+  /* PROGRESS */
+  .progress-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .ring-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+  }
+  .progress-text .count { font-size: 22px; font-weight: 800; }
+  .progress-text .label { font-size: 13px; color: var(--muted); }
+  .progress-text .perfect { font-size: 12px; color: #10B981; font-weight: 700; margin-top: 4px; }
+
+  /* TODAY SPORT */
+  .today-sport {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border-left: 4px solid #3B82F6;
+  }
+  .today-sport .eyebrow { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .today-sport .activity { font-size: 17px; font-weight: 700; }
+  .today-sport .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* CATEGORY */
+  .cat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin: 16px 0 8px;
+  }
+
+  /* HABIT ITEM */
+  .habit {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--surface);
+    margin-bottom: 6px;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    transition: background 0.15s, border-left 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .habit.done { border-left-color: var(--cat-color); background: #141e14; }
+  .habit.done .habit-label { text-decoration: line-through; color: var(--muted); }
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-size: 13px;
+    font-weight: 900;
+    color: #fff;
+  }
+  .habit.done .checkbox { border-color: var(--cat-color); background: var(--cat-color); }
+  .habit-label { font-size: 14px; line-height: 1.3; }
+
+  /* GYM */
+  .gym-day-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .gym-day-tab {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--surface);
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .gym-day-tab.active { color: #fff; }
+
+  .gym-header { margin-bottom: 14px; }
+  .gym-header .name { font-size: 20px; font-weight: 800; }
+  .gym-header .sub { font-size: 13px; color: var(--muted); }
+
+  .exercise {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 8px;
+    border-left: 3px solid transparent;
+  }
+  .exercise-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .exercise-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .exercise-badges { display: flex; gap: 6px; flex-shrink: 0; }
+  .badge {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .exercise-note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .progress-tip {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* WEEK */
+  .week-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--border);
+  }
+  .week-item.today { border-left-color: #3B82F6; outline: 1px solid #3B82F630; }
+  .week-item-top { display: flex; justify-content: space-between; align-items: center; }
+  .week-day { font-size: 12px; font-weight: 700; color: var(--muted); margin-right: 10px; }
+  .week-activity { font-size: 15px; font-weight: 600; }
+  .week-badge { font-size: 11px; color: #3B82F6; font-weight: 700; }
+  .week-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .run-prog { margin-top: 20px; }
+  .run-prog-title { font-size: 12px; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .run-row { display: flex; gap: 12px; margin-bottom: 8px; align-items: flex-start; }
+  .run-week { min-width: 56px; font-size: 12px; color: #10B981; font-weight: 700; padding-top: 1px; }
+  .run-desc { font-size: 13px; color: #AAA; }
+
+  /* VERLAUF */
+  .chart-wrap { display: flex; gap: 8px; align-items: flex-end; height: 130px; padding: 0 4px; margin-bottom: 20px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bar-count { font-size: 11px; color: var(--muted); min-height: 14px; }
+  .bar-track { width: 100%; background: var(--surface); border-radius: 6px; height: 90px; display: flex; align-items: flex-end; overflow: hidden; }
+  .bar-fill { width: 100%; border-radius: 4px; transition: height 0.4s ease; min-height: 3px; }
+  .bar-label { font-size: 12px; color: var(--muted); }
+  .bar-label.today { color: #3B82F6; font-weight: 700; }
+
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { background: var(--surface2); border-radius: 12px; padding: 14px; }
+  .stat-val { font-size: 24px; font-weight: 800; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* PAST DAY BANNER */
+  .past-banner {
+    background: #2A1A00;
+    border: 1px solid #F59E0B44;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #F59E0B;
+  }
+
+  /* FOOTER */
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 520px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    font-size: 11px;
+    color: var(--subtle);
+    text-align: center;
+  }
+
+  .section-title {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    border-left: 3px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-date" id="headerDate"></div>
+  <div class="header-title">Masterplan</div>
+  <div class="header-sub">Martin Edenhofer · 3-Monats-Stack</div>
+</div>
+
+<div class="date-nav">
+  <button onclick="changeDay(-1)">‹</button>
+  <div class="date-display" id="dateDisplay"></div>
+  <button class="today-btn hidden" id="todayBtn" onclick="goToday()">Heute</button>
+  <button onclick="changeDay(1)" id="nextBtn">›</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="setTab('heute', this)">Heute</button>
+  <button class="tab" onclick="setTab('gym', this)">Gym</button>
+  <button class="tab" onclick="setTab('woche', this)">Woche</button>
+  <button class="tab" onclick="setTab('verlauf', this)">Verlauf</button>
+</div>
+
+<div class="content" id="content"></div>
+
+<div class="footer">Daten lokal gespeichert im Browser · Immer dieselbe Datei öffnen</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const HABITS = [
+  { id: "wake",         icon: "🌅", label: "Aufgewacht ohne Handy (30–60 Min.)",      cat: "morgen" },
+  { id: "sun",          icon: "☀️", label: "Sonnenlicht in den ersten 30 Min.",        cat: "morgen" },
+  { id: "skincare_am",  icon: "🧴", label: "Morgen-Skincare + Sonnencreme",            cat: "morgen" },
+  { id: "chintuck_am",  icon: "💪", label: "Chin Tucks morgens (2×30)",                cat: "morgen" },
+  { id: "breakfast",    icon: "🥚", label: "Proteinreiches Frühstück",                 cat: "ernaehrung" },
+  { id: "protein",      icon: "🥩", label: "Protein-Ziel erreicht (~150 g+)",          cat: "ernaehrung" },
+  { id: "water",        icon: "💧", label: "3+ Liter Wasser getrunken",                cat: "ernaehrung" },
+  { id: "supplements",  icon: "💊", label: "Supplements genommen",                     cat: "ernaehrung" },
+  { id: "nojunk",       icon: "🚫", label: "Kein Junk / Zucker-Getränke",              cat: "ernaehrung" },
+  { id: "training",     icon: "🏋️", label: "Training / Gym",                           cat: "bewegung" },
+  { id: "steps",        icon: "👟", label: "10.000 Schritte",                          cat: "bewegung" },
+  { id: "duolingo",     icon: "🇮🇹", label: "Duolingo Italienisch (mind. 1 Lektion)",   cat: "geist" },
+  { id: "lesen",        icon: "📖", label: "5 Seiten lesen",                           cat: "geist" },
+  { id: "journaling",   icon: "✍️", label: "Journalen",                                cat: "geist" },
+  { id: "mewing",       icon: "👅", label: "Mewing den ganzen Tag",                    cat: "gesicht" },
+  { id: "chew",         icon: "🦷", label: "Hartes Kauen / Mastic Gum",               cat: "gesicht" },
+  { id: "posture",      icon: "🧍", label: "Haltung: Kopf über Wirbelsäule",           cat: "gesicht" },
+  { id: "focus",        icon: "📚", label: "Fokusblock erledigt (Lernen/Bewerbung)",   cat: "arbeit" },
+  { id: "noPhone_pm",   icon: "📵", label: "Kein Handy ab 21:00 Uhr",                  cat: "abend" },
+  { id: "skincare_pm",  icon: "🌙", label: "Abend-Skincare",                           cat: "abend" },
+  { id: "sleep",        icon: "😴", label: "Schlafen um 23:00 Uhr",                   cat: "abend" },
+];
+
+const CATS = {
+  morgen:     { label: "Morgen",     color: "#F59E0B" },
+  ernaehrung: { label: "Ernährung",  color: "#10B981" },
+  bewegung:   { label: "Bewegung",   color: "#3B82F6" },
+  geist:      { label: "Geist",      color: "#EC4899" },
+  gesicht:    { label: "Gesicht",    color: "#8B5CF6" },
+  arbeit:     { label: "Fokus",      color: "#EF4444" },
+  abend:      { label: "Abend",      color: "#6366F1" },
+};
+
+const GYM = {
+  A: { label: "Tag A – Push", sub: "Brust · Schulter · Trizeps", color: "#3B82F6",
+    ex: [
+      ["Bankdrücken (Langhantel)",      "3", "4–6",   "Hauptbewegung – maximal schwer"],
+      ["Incline Dumbbell Press",        "3", "5–7",   "Obere Brust"],
+      ["Schulterdrücken (LH oder KH)", "3", "5–7",   ""],
+      ["Lateral Raises",               "3", "8–10",  "Kontrolliert – kein Schwung"],
+      ["Trizeps Dips / Pushdown",      "3", "6–8",   ""],
+      ["Chin Tucks",                   "3", "20",    "Aktiv, volle Bewegung"],
+    ]},
+  B: { label: "Tag B – Pull", sub: "Rücken · Bizeps · Rear Delt", color: "#10B981",
+    ex: [
+      ["Klimmzüge (+ Gewicht)",        "3", "4–6",   "Oder Lat Pulldown schwer"],
+      ["Barbell Row",                  "3", "4–6",   "Hauptbewegung"],
+      ["Cable Row",                    "3", "6–8",   ""],
+      ["Face Pulls",                   "3", "12–15", "Haltung + Rear Delt – nie skippen"],
+      ["Bizeps Curl (Langhantel)",     "3", "5–7",   ""],
+      ["Neck Flexion + Extension",     "3", "10–12", "Maschine oder Widerstand"],
+    ]},
+  C: { label: "Tag C – Legs", sub: "Beine · Rumpf", color: "#EF4444",
+    ex: [
+      ["Kniebeuge (Langhantel)",           "3", "4–6",  "Schwerste Einheit der Woche"],
+      ["Romanian Deadlift",               "3", "5–7",  "Langsam exzentrisch"],
+      ["Leg Press",                       "3", "6–8",  ""],
+      ["Leg Curl",                        "3", "8–10", ""],
+      ["Calf Raises",                     "3", "10–12","Volle Bewegung"],
+      ["Ab Wheel / Hanging Leg Raise",    "3", "8–10", ""],
+    ]},
+  D: { label: "Tag D – Upper", sub: "Oberkörper Wiederholung", color: "#8B5CF6",
+    ex: [
+      ["Incline Bench Press",         "3", "5–7",  ""],
+      ["Pull-ups / Lat Pulldown",     "3", "5–7",  ""],
+      ["Dumbbell Shoulder Press",     "3", "6–8",  ""],
+      ["Seated Cable Row",            "3", "6–8",  ""],
+      ["Bizeps + Trizeps Superset",   "3", "8",    "Supersatz"],
+      ["Face Pulls",                  "3", "15",   "Immer als Abschluss"],
+    ]},
+};
+
+const WEEK = [
+  { day: "Mo", activity: "Gym A – Push",          type: "gym",    gymDay: "A" },
+  { day: "Di", activity: "Laufen 30–45 Min.",      type: "cardio" },
+  { day: "Mi", activity: "Gym B – Pull",           type: "gym",    gymDay: "B" },
+  { day: "Do", activity: "Radfahren / Erholung",   type: "cardio" },
+  { day: "Fr", activity: "Gym C – Legs",           type: "gym",    gymDay: "C" },
+  { day: "Sa", activity: "Gym D – Upper",          type: "gym",    gymDay: "D" },
+  { day: "So", activity: "Vollständige Erholung",  type: "rest" },
+];
+// js day: 0=Sun,1=Mon,...6=Sat → WEEK index
+const JS_TO_WEEK = [6,0,1,2,3,4,5];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+let currentTab = "heute";
+let currentGymTab = "A";
+let viewDate = new Date(); // the day we are looking at
+
+function dateKey(d) {
+  return d.toISOString().slice(0,10);
+}
+function todayKey() {
+  return dateKey(new Date());
+}
+function isToday(d) {
+  return dateKey(d) === todayKey();
+}
+
+function loadChecked(d) {
+  try { return JSON.parse(localStorage.getItem("habits_" + dateKey(d)) || "{}"); }
+  catch { return {}; }
+}
+function saveChecked(d, data) {
+  localStorage.setItem("habits_" + dateKey(d), JSON.stringify(data));
+  // also save count for history
+  const count = Object.values(data).filter(Boolean).length;
+  const hist = loadHistory();
+  hist[dateKey(d)] = count;
+  localStorage.setItem("habit_history", JSON.stringify(hist));
+}
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem("habit_history") || "{}"); }
+  catch { return {}; }
+}
+
+// ─── DATE NAV ────────────────────────────────────────────────────────────────
+
+function changeDay(delta) {
+  const d = new Date(viewDate);
+  d.setDate(d.getDate() + delta);
+  // don't allow future days
+  if (d > new Date()) return;
+  viewDate = d;
+  updateDateNav();
+  if (currentTab === "heute") renderHabitTab();
+}
+function goToday() {
+  viewDate = new Date();
+  updateDateNav();
+  if (currentTab === "heute") renderHabitTab();
+}
+function updateDateNav() {
+  const opts = { weekday: "long", day: "numeric", month: "long" };
+  const display = isToday(viewDate)
+    ? "Heute – " + viewDate.toLocaleDateString("de-DE", { day: "numeric", month: "long" })
+    : viewDate.toLocaleDateString("de-DE", opts);
+  document.getElementById("dateDisplay").textContent = display;
+  document.getElementById("todayBtn").classList.toggle("hidden", isToday(viewDate));
+  document.getElementById("nextBtn").style.opacity = isToday(viewDate) ? "0.3" : "1";
+  document.getElementById("nextBtn").style.pointerEvents = isToday(viewDate) ? "none" : "auto";
+  document.getElementById("headerDate").textContent =
+    viewDate.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+
+function setTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  render();
+}
+
+function render() {
+  if (currentTab === "heute") renderHabitTab();
+  else if (currentTab === "gym") renderGymTab();
+  else if (currentTab === "woche") renderWocheTab();
+  else if (currentTab === "verlauf") renderVerlaufTab();
+}
+
+// ─── HEUTE ───────────────────────────────────────────────────────────────────
+
+function renderHabitTab() {
+  const checked = loadChecked(viewDate);
+  const total = HABITS.length;
+  const done = Object.values(checked).filter(Boolean).length;
+  const pct = Math.round((done / total) * 100);
+  const todayWeekIdx = JS_TO_WEEK[new Date().getDay()];
+  const plan = WEEK[todayWeekIdx];
+  const typeColor = plan.type === "gym" ? "#3B82F6" : plan.type === "cardio" ? "#10B981" : "#444";
+
+  const circum = 2 * Math.PI * 32;
+  const dash = circum * (1 - pct / 100);
+
+  // group habits
+  const grouped = {};
+  HABITS.forEach(h => { if (!grouped[h.cat]) grouped[h.cat] = []; grouped[h.cat].push(h); });
+
+  let html = "";
+
+  // past banner
+  if (!isToday(viewDate)) {
+    html += `<div class="past-banner">📅 Vergangener Tag – du kannst Häkchen nachträglich setzen oder korrigieren.</div>`;
+  }
+
+  // today's sport (always shows TODAY's plan, not the viewed date)
+  html += `
+    <div class="today-sport" style="border-left-color:${typeColor}">
+      <div class="eyebrow">Heute auf dem Plan</div>
+      <div class="activity">${plan.type==="gym"?"🏋️":plan.type==="cardio"?"🏃":"😴"} ${plan.activity}</div>
+      ${plan.gymDay ? `<div class="sub">${GYM[plan.gymDay].sub}</div>` : ""}
+    </div>`;
+
+  // progress ring
+  html += `
+    <div class="progress-card">
+      <div class="ring-wrap">
+        <svg width="76" height="76" viewBox="0 0 76 76">
+          <circle cx="38" cy="38" r="32" fill="none" stroke="#2A2A38" stroke-width="7"/>
+          <circle cx="38" cy="38" r="32" fill="none" stroke="#3B82F6" stroke-width="7"
+            stroke-dasharray="${circum}" stroke-dashoffset="${dash}"
+            stroke-linecap="round"/>
+        </svg>
+        <div class="ring-label">${pct}%</div>
+      </div>
+      <div class="progress-text">
+        <div class="count">${done} / ${total}</div>
+        <div class="label">Gewohnheiten ${isToday(viewDate) ? "heute" : "an diesem Tag"}</div>
+        ${done === total ? `<div class="perfect">Perfekter Tag! 🔥</div>` : ""}
+      </div>
+    </div>`;
+
+  // habits
+  Object.entries(grouped).forEach(([cat, habits]) => {
+    const c = CATS[cat];
+    html += `<div class="cat-label" style="color:${c.color}">${c.label}</div>`;
+    habits.forEach(h => {
+      const isDone = !!checked[h.id];
+      html += `
+        <button class="habit${isDone?" done":""}" style="--cat-color:${c.color}"
+          onclick="toggleHabit('${h.id}')">
+          <div class="checkbox">${isDone ? "✓" : ""}</div>
+          <span class="habit-label">${h.icon} ${h.label}</span>
+        </button>`;
+    });
+  });
+
+  document.getElementById("content").innerHTML = html;
+}
+
+function toggleHabit(id) {
+  const checked = loadChecked(viewDate);
+  checked[id] = !checked[id];
+  saveChecked(viewDate, checked);
+  renderHabitTab();
+}
+
+// ─── GYM ─────────────────────────────────────────────────────────────────────
+
+function renderGymTab() {
+  const day = GYM[currentGymTab];
+  let html = `
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+      3 Sätze · schwer · 4–8 Wdh. · Progression jede Einheit
+    </div>
+    <div class="gym-day-tabs">`;
+  Object.entries(GYM).forEach(([k, d]) => {
+    html += `<button class="gym-day-tab${currentGymTab===k?" active":""}" style="${currentGymTab===k?"background:"+d.color:"background:var(--surface)"}"
+      onclick="setGymTab('${k}')">${k}</button>`;
+  });
+  html += `</div>
+    <div class="gym-header">
+      <div class="name">${day.label}</div>
+      <div class="sub">${day.sub}</div>
+    </div>`;
+
+  day.ex.forEach(([name, sets, reps, note]) => {
+    html += `
+      <div class="exercise" style="border-left-color:${day.color}">
+        <div class="exercise-top">
+          <div class="exercise-name">${name}</div>
+          <div class="exercise-badges">
+            <div class="badge" style="color:${day.color}">${sets}×</div>
+            <div class="badge">${reps}</div>
+          </div>
+        </div>
+        ${note ? `<div class="exercise-note">${note}</div>` : ""}
+      </div>`;
+  });
+
+  html += `<div class="progress-tip">💡 Progression: Jede Einheit entweder +1 Wdh. oder +2,5 kg – nicht beides gleichzeitig.</div>`;
+  document.getElementById("content").innerHTML = html;
+}
+
+function setGymTab(k) {
+  currentGymTab = k;
+  renderGymTab();
+}
+
+// ─── WOCHE ───────────────────────────────────────────────────────────────────
+
+function renderWocheTab() {
+  const todayIdx = JS_TO_WEEK[new Date().getDay()];
+  let html = `<div style="font-size:13px;color:var(--muted);margin-bottom:12px">4× Gym + Ausdauer + Erholung</div>`;
+
+  WEEK.forEach((item, i) => {
+    const isTodayItem = i === todayIdx;
+    const tc = item.type==="gym" ? "#3B82F6" : item.type==="cardio" ? "#10B981" : "#444";
+    html += `
+      <div class="week-item${isTodayItem?" today":""}" style="border-left-color:${isTodayItem?"#3B82F6":tc}">
+        <div class="week-item-top">
+          <div><span class="week-day">${item.day}</span><span class="week-activity">${item.activity}</span></div>
+          ${isTodayItem ? `<div class="week-badge">HEUTE</div>` : ""}
+        </div>
+        ${item.gymDay ? `<div class="week-sub">${GYM[item.gymDay].sub}</div>` : ""}
+      </div>`;
+  });
+
+  html += `<div class="run-prog">
+    <div class="run-prog-title">Lauf-Progression (12 Wochen)</div>`;
+  [
+    ["Wo. 1–2",  "3× 20–25 Min. locker (Basis aufbauen)"],
+    ["Wo. 3–4",  "2× 30 Min. + 1× 35 Min."],
+    ["Wo. 5–6",  "2× 35 Min. + 1× 45 Min. (erste 5k)"],
+    ["Wo. 7–8",  "2× 40 Min. + 1× 50 Min."],
+    ["Wo. 9–12", "2× 45 Min. + 1× langer Lauf → 10k Ziel"],
+  ].forEach(([w,d]) => {
+    html += `<div class="run-row"><div class="run-week">${w}</div><div class="run-desc">${d}</div></div>`;
+  });
+  html += `</div>`;
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── VERLAUF ─────────────────────────────────────────────────────────────────
+
+function renderVerlaufTab() {
+  const hist = loadHistory();
+  const total = HABITS.length;
+  const today = new Date();
+
+  const last7 = Array.from({length:7}, (_,i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (6-i));
+    const key = dateKey(d);
+    const dayName = ["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()];
+    return { key, dayName, count: hist[key] || 0, isToday: key === todayKey() };
+  });
+
+  let html = `<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Letzte 7 Tage</div>
+    <div class="chart-wrap">`;
+
+  last7.forEach(d => {
+    const pct = total > 0 ? (d.count / total) * 100 : 0;
+    const col = d.isToday ? "#3B82F6" : pct >= 80 ? "#10B981" : pct >= 50 ? "#F59E0B" : "#333";
+    html += `
+      <div class="bar-col">
+        <div class="bar-count">${d.count > 0 ? d.count : ""}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="height:${Math.max(pct,3)}%;background:${col}"></div>
+        </div>
+        <div class="bar-label${d.isToday?" today":""}">${d.dayName}</div>
+      </div>`;
+  });
+
+  html += `</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>≥80% – Starker Tag</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>50–79%</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#333"></div>&lt;50%</div>
+    </div>`;
+
+  const allDays = Object.keys(hist).length;
+  const perfectDays = Object.values(hist).filter(v => v >= total).length;
+  const todayCount = hist[todayKey()] || 0;
+  const avg7 = last7.length ? Math.round(last7.reduce((a,b) => a+b.count,0) / last7.length) : 0;
+
+  html += `<div class="stats-grid">
+    <div class="stat-card"><div class="stat-val">${allDays}</div><div class="stat-label">Tage getrackt</div></div>
+    <div class="stat-card"><div class="stat-val">${perfectDays}</div><div class="stat-label">Perfekte Tage</div></div>
+    <div class="stat-card"><div class="stat-val">${todayCount}/${total}</div><div class="stat-label">Heute</div></div>
+    <div class="stat-card"><div class="stat-val">${avg7}</div><div class="stat-label">Ø letzte 7 Tage</div></div>
+  </div>`;
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+updateDateNav();
+render();
+</script>
+</body>
+</html>
